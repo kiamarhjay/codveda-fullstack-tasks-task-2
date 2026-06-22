@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 dotenv.config(); //loads environment files from process.env
 connectDB(); //connects to mongoDB database
 const app = express();
+const authRoutes = require('./routes/authRoutes')
 
 //global middlewares
 app.use(cors()); //allow frontend framework to talk to backend server using different port
@@ -13,6 +14,8 @@ app.use(express.json()); //allow express routes to read json body data sent by c
 app.get('/', (req,res) => {
     res.send('API is running successfully 🌿');
 });
+app.use('/api/auth', authRoutes)
+
 
 
 const PORT = process.env.PORT || 4000;
