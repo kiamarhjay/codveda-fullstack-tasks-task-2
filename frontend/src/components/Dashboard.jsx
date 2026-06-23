@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 function Dashboard ({ token}) {
     const [expenses, setExpenses] = useState([]);
@@ -8,6 +9,7 @@ function Dashboard ({ token}) {
     const [type, setType] = useState('Expense');
     const [category, setCategory] = useState('General');
     const [error, setError] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
 
     const config = {
         headers: {
@@ -26,6 +28,16 @@ function Dashboard ({ token}) {
 
     useEffect(() => {
         fetchExpenses();
+    }, []);
+
+    useEffect(()=>{
+        const socket = io('http://localhost:4000');
+        socket.on('budget_alert', (data)=> {
+            console.log("🔥Recieved alert:", data);
+            setAlertMessage(data.message);
+            setTimeout(() => setAlertMessage(''), 5000);
+        });
+        return() => socket.disconnect();
     }, []);
 
     const handleAddExpenses = async (e) => {
@@ -94,6 +106,20 @@ function Dashboard ({ token}) {
                     <button type="submit">Add Entry</button>
                 </form>
             </div>
+            {alertMessage &&(
+                <div style={{
+                    backgroundColor: '#ff4d4d',
+                    color: 'white',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    marginBottom: '15px',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    boxShadow: '0px 4px 10px rgba(0,0,0,0.1)'
+                }}>
+                    {alertMessage}
+                </div>
+            )}
 
             <div className="card list-card">
                 <h3>Transaction Ledger</h3>

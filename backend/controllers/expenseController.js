@@ -20,6 +20,13 @@ const createExpense = async (req,res) => {
             category,
             date,
         });
+        const io = req.app.get('io');
+        if (type=== 'Expense' && Number(amount) >=500){
+            io.emit('budget_alert', {
+                message:`⚠️High Spending Alert! $${amount} spent on "${title}".`
+            });
+        }
+    
         res.status(201).json(expense);
     } catch (error) {
         res.status(400).json({ message: error.message });
