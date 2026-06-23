@@ -18,12 +18,12 @@ function Register ({ setToken, switchToLogin }) {
                 password,
             });
 
-            if (response.data.token) {
+            if (response.data && response.data.token) {
                 setToken(response.data.token);
             }
         } catch (error) {
             setErrorMessage(
-                error.response && error.response.data.message ? error.response.data.message : 'Registration failed. Try again.'
+                error.response?.data?.message || 'Registration failed. Try again.'
             );
         }
     };
@@ -59,7 +59,7 @@ function Register ({ setToken, switchToLogin }) {
                 </div>
 
                  <div className="form-group">
-                    <label>Password</label>
+                    <label>Password (Min. 6 characters)</label>
                     <input
                         type="password"
                         placeholder="Choose secure password"

@@ -5,7 +5,7 @@ function Dashboard ({ token}) {
     const [expenses, setExpenses] = useState([]);
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
-    const [type, setType] = useState('expense');
+    const [type, setType] = useState('Expense');
     const [category, setCategory] = useState('General');
     const [error, setError] = useState('');
 
@@ -17,7 +17,7 @@ function Dashboard ({ token}) {
 
     const fetchExpenses = async() => {
         try{
-            const response = await axios.get('http://localhost:5000/api/expenses', config);
+            const response = await axios.get('http://localhost:4000/api/expenses', config);
             setExpenses(response.data);
         } catch (err) {
             setError('Could not fetch transaction data.');
@@ -34,7 +34,7 @@ function Dashboard ({ token}) {
 
         try {
             await axios.post(
-                'http://localhost:500/api/expenses',
+                'http://localhost:4000/api/expenses',
                 { title, amount: Number(amount), type, category },
                 config
             );
@@ -48,7 +48,7 @@ function Dashboard ({ token}) {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/expenses/${id}`, config);
+            await axios.delete(`http://localhost:4000/api/expenses/${id}`, config);
             fetchExpenses(); 
         } catch (err) {
             setError('Could not delete the selected item.');
@@ -62,7 +62,7 @@ function Dashboard ({ token}) {
             {/*Entry Input Form Box*/}
             <div className="dashboard-grid">
                 <h3>Log New Transaction</h3>
-                <form onSubmit={handleAddExpense}>
+                <form onSubmit={handleAddExpenses}>
                     <input
                         type="text"
                         placeholder="What did you pay for"
@@ -74,13 +74,13 @@ function Dashboard ({ token}) {
                         type="number"
                         placeholder="Account"
                         value={amount}
-                        onChange={(e) => set(e.target.value)}
+                        onChange={(e) => setAmount(e.target.value)}
                         required
                     />
 
                     <select value={type} onChange={(e) => setType(e.target.value)}>
-                        <option value="expense">Expense(-)</option>
-                        <option value="income">Income(+)</option>
+                        <option value="Expense">Expense (-)</option>
+                        <option value="Income">Income (+)</option>
                     </select>
 
                     <select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -102,14 +102,14 @@ function Dashboard ({ token}) {
                 ) : (
                     <ul className="expense-list">
                         {expenses.map((item) => (
-                        <li key={item._id} className={`expense-item ${item,type}`}>
+                        <li key={item._id} className={`expense-item ${item.type.toLowerCase()}`}>
                             <div className="item-details">
                                 <span className="item-title">{item.title}</span>
                                 <span className="item-category">{item.category}</span>
                             </div>
                             <div className="item-numeric">
                                 <span className="item-amount">
-                                    {item.type==='expense' ? '-' : '+'}${item.amount}
+                                    {item?.type === 'Expense' ? '-' : '+'}${item.amount || 0}
                                 </span>
                                 <button className="delete-btn" onClick={() => handleDelete(item._id)}>❌</button>
                             </div>

@@ -16,14 +16,12 @@ function Login ({ setToken, switchToRegister }) {
                 password,
             });
 
-            if (response.data.token) {
+            if (response.data && response.data.token) {
                 setToken(response.data.token);
             }
         } catch (error) {
             setErrorMessage(
-                error.response && error.response.data.message
-                ? error.response.data.message 
-                : 'Something went wrong. Try again.'
+                error.response?.data?.message ||'Invalid email or password. Try again.'
             );
         }
     };
@@ -31,7 +29,7 @@ function Login ({ setToken, switchToRegister }) {
     return (
         <div className="auth-card">
             <h2>Welcome Back</h2>
-            <p>Log in manage your daily tracker</p>
+            <p>Log in to manage your daily tracker</p>
             {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
             <form onSubmit={handleSubmit}>
