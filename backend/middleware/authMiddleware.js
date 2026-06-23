@@ -17,4 +17,15 @@ const protect = async (req,res, next) => {
         return res.status(401).json({ message: 'Not authorized, no token provided'});
     }
 };
-module.exports = { protect };
+
+const authorizeRoles = (...allowedRoles) => {
+    return (req,res,next) => {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({
+                message: `Forbidden: Role '${req.user?.role}' does not have the permission to perform this action.`
+            });
+        }
+        next();
+    };
+};
+module.exports = { protect, authorizeRoles };

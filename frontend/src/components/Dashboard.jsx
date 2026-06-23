@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-function Dashboard ({ token}) {
+function Dashboard ({ token }) {
     const [expenses, setExpenses] = useState([]);
     const [title, setTitle] = useState('');
     const [amount, setAmount] = useState('');
@@ -18,11 +18,12 @@ function Dashboard ({ token}) {
     };
 
     const fetchExpenses = async() => {
-        try{
+        try {
             const response = await axios.get('http://localhost:4000/api/expenses', config);
             setExpenses(response.data);
         } catch (err) {
             setError('Could not fetch transaction data.');
+            setTimeout(() => setError(''), 5000);
         }
     };
 
@@ -30,14 +31,14 @@ function Dashboard ({ token}) {
         fetchExpenses();
     }, []);
 
-    useEffect(()=>{
+    useEffect(() => {
         const socket = io('http://localhost:4000');
-        socket.on('budget_alert', (data)=> {
-            console.log("🔥Recieved alert:", data);
+        socket.on('budget_alert', (data) => {
+            console.log("🔥 Received alert:", data);
             setAlertMessage(data.message);
             setTimeout(() => setAlertMessage(''), 5000);
         });
-        return() => socket.disconnect();
+        return () => socket.disconnect();
     }, []);
 
     const handleAddExpenses = async (e) => {
@@ -55,6 +56,7 @@ function Dashboard ({ token}) {
             fetchExpenses();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add item.');
+            setTimeout(() => setError(''), 5000);
         }
     };
 
@@ -64,14 +66,86 @@ function Dashboard ({ token}) {
             fetchExpenses(); 
         } catch (err) {
             setError('Could not delete the selected item.');
+            setTimeout(() => setError(''), 5000);
         }
     };
 
     return (
         <div className="dashboard-grid">
-            {error && <div className="error-banner">{error}</div>}
+            
+            {/* 🛑 FLOATING ACTION/DELETE ERROR BANNER */}
+            {error && (
+                <div style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    backgroundColor: '#ff4d4d', 
+                    color: 'white',
+                    padding: '16px 24px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    boxShadow: '0px 10px 25px rgba(0,0,0,0.25)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    borderLeft: '5px solid #280a02'
+                }}>
+                    <span>{error}</span>
+                    <button
+                        onClick={() => setError('')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            paddingLeft: '10px',
+                            fontWeight: 'bold'
+                        }}>
+                        ×
+                    </button>
+                </div>
+            )}
 
-            {/*Entry Input Form Box*/}
+            {/* 🔥 FLOATING REAL-TIME BUDGET SOCKET BANNER */}
+            {alertMessage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '90px', // Shifted down slightly so they stack cleanly if both show up
+                    right: '20px',
+                    backgroundColor: '#ff4d4d', // Vibrant alert red
+                    color: 'white',
+                    padding: '16px 24px',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    boxShadow: '0px 10px 25px rgba(0,0,0,0.25)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    borderLeft: '5px solid #b45309'
+                }}>
+                    <span>{alertMessage}</span>
+                    <button
+                        onClick={() => setAlertMessage('')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'white',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            paddingLeft: '10px',
+                            fontWeight: 'bold'
+                        }}>
+                        ×
+                    </button>
+                </div>
+            )}
+
+            {/* Entry Input Form Box */}
             <div className="dashboard-grid">
                 <h3>Log New Transaction</h3>
                 <form onSubmit={handleAddExpenses}>
@@ -99,27 +173,13 @@ function Dashboard ({ token}) {
                         <option value="General">General</option>
                         <option value="Food">Food & Drink</option>
                         <option value="Housing">Rent & Bills</option>
-                        <option value="Entertainment">Entertaiment</option>
+                        <option value="Entertainment">Entertainment</option>
                         <option value="Salary">Salary/Revenue</option>
                     </select>
 
                     <button type="submit">Add Entry</button>
                 </form>
             </div>
-            {alertMessage &&(
-                <div style={{
-                    backgroundColor: '#ff4d4d',
-                    color: 'white',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    marginBottom: '15px',
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    boxShadow: '0px 4px 10px rgba(0,0,0,0.1)'
-                }}>
-                    {alertMessage}
-                </div>
-            )}
 
             <div className="card list-card">
                 <h3>Transaction Ledger</h3>
